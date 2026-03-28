@@ -3,357 +3,376 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Nervebase</title>
+<title>nervebase.ai</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Onest:wght@300;400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #060608;
-  --surface: #0d0d10;
-  --border: rgba(255,255,255,0.07);
-  --border-hover: rgba(255,255,255,0.14);
-  --white: #ffffff;
-  --dim: rgba(255,255,255,0.38);
-  --dimmer: rgba(255,255,255,0.16);
-  --accent: #6e5cff;
-  --accent-2: #a78bfa;
-  --accent-glow: rgba(110,92,255,0.18);
+  --bg:        #09090b;
+  --surface:   #111113;
+  --surface-2: #1a1a1e;
+  --border:    rgba(255,255,255,0.07);
+  --border-2:  rgba(255,255,255,0.12);
+  --text:      #f4f4f5;
+  --muted:     rgba(255,255,255,0.4);
+  --faint:     rgba(255,255,255,0.15);
+  --blue:      #3b82f6;
+  --blue-dim:  rgba(59,130,246,0.15);
+  --blue-glow: rgba(59,130,246,0.08);
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--white); font-family: 'Onest', sans-serif; overflow-x: hidden; }
-body { display: flex; flex-direction: column; min-height: 100vh; }
+html { font-size: 16px; }
 
-/* ambient orb */
-.orb {
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── background glow ── */
+.glow {
   position: fixed;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(140px);
   pointer-events: none;
   z-index: 0;
 }
-.orb-1 { width: 600px; height: 600px; top: -200px; left: 50%; transform: translateX(-50%); background: rgba(110,92,255,0.12); }
-.orb-2 { width: 400px; height: 400px; bottom: -100px; right: -100px; background: rgba(167,139,250,0.07); }
+.glow-top  { width: 700px; height: 500px; top: -250px; left: 50%; transform: translateX(-50%); background: rgba(59,130,246,0.06); }
+.glow-bot  { width: 400px; height: 400px; bottom: -150px; right: -100px; background: rgba(59,130,246,0.04); }
 
-#nerve-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.22; }
-
-main {
-  position: relative; z-index: 10;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  flex: 1; padding: 4rem 1.5rem; text-align: center;
+/* ── canvas ── */
+#cv {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  opacity: 0.18;
 }
 
-/* pill badge */
+/* ── page layout ── */
+.page {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex: 1;
+  padding: clamp(2.5rem, 8vw, 5rem) clamp(1.25rem, 6vw, 3rem);
+  text-align: center;
+}
+
+/* ── badge ── */
 .badge {
   display: inline-flex; align-items: center; gap: 7px;
-  background: rgba(110,92,255,0.1);
-  border: 1px solid rgba(110,92,255,0.25);
+  background: var(--blue-dim);
+  border: 1px solid rgba(59,130,246,0.2);
   border-radius: 100px;
-  padding: 5px 14px;
-  font-family: 'Onest', sans-serif;
-  font-size: 11px; font-weight: 400;
-  letter-spacing: 0.06em;
-  color: var(--accent-2);
-  margin-bottom: 2.5rem;
-  opacity: 0;
-  animation: up 0.7s cubic-bezier(0.22,1,0.36,1) forwards 0.1s;
-}
-.badge-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-  animation: blink 2.5s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-/* wordmark */
-.wordmark {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: clamp(3.8rem, 11vw, 8rem);
-  letter-spacing: -0.03em;
-  line-height: 0.95;
-  background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.55) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  opacity: 0;
-  animation: up 0.9s cubic-bezier(0.22,1,0.36,1) forwards 0.25s;
-}
-
-/* headline */
-.headline {
-  font-family: 'Syne', sans-serif;
+  padding: 5px 13px;
+  font-size: 11px;
   font-weight: 500;
-  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
-  color: var(--dim);
+  letter-spacing: 0.06em;
+  color: #93c5fd;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+  opacity: 0;
+  animation: rise 0.7s cubic-bezier(.22,1,.36,1) forwards 0.1s;
+}
+.dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 6px var(--blue);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── logo ── */
+.logo {
+  font-size: clamp(2rem, 7vw, 3.25rem);
+  font-weight: 300;
   letter-spacing: -0.01em;
-  line-height: 1.6;
-  max-width: 540px;
-  margin-top: 1.75rem;
+  color: rgba(255,255,255,0.88);
+  line-height: 1;
+  margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
   opacity: 0;
-  animation: up 0.8s cubic-bezier(0.22,1,0.36,1) forwards 0.4s;
+  animation: rise 0.8s cubic-bezier(.22,1,.36,1) forwards 0.25s;
 }
-.headline b { color: rgba(255,255,255,0.85); font-weight: 600; }
+.logo .ai {
+  color: var(--blue);
+  font-weight: 500;
+}
 
-/* separator */
-.sep {
-  display: flex; align-items: center; gap: 16px;
-  width: 100%; max-width: 360px;
-  margin: 2.5rem auto;
+/* ── headline ── */
+.headline {
+  font-size: clamp(1.05rem, 3vw, 1.35rem);
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.65;
+  max-width: 480px;
+  margin: 0 auto clamp(1.5rem, 4vw, 2.5rem);
   opacity: 0;
-  animation: up 0.6s ease forwards 0.6s;
+  animation: rise 0.8s cubic-bezier(.22,1,.36,1) forwards 0.4s;
 }
-.sep-line { flex: 1; height: 1px; background: var(--border); }
-.sep-icon { color: var(--dimmer); font-size: 14px; font-family: 'Onest', sans-serif; letter-spacing: 0.08em; }
+.headline strong { color: rgba(255,255,255,0.85); font-weight: 500; }
 
-/* body para */
-.para {
-  font-family: 'Onest', sans-serif;
-  font-size: 14px; font-weight: 300;
-  color: var(--dimmer);
+/* ── divider ── */
+.rule {
+  width: 100%; max-width: 340px;
+  height: 1px;
+  background: var(--border);
+  margin: 0 auto clamp(1.5rem, 4vw, 2.5rem);
+  opacity: 0;
+  animation: rise 0.6s ease forwards 0.55s;
+}
+
+/* ── body text ── */
+.body {
+  font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
   line-height: 1.9;
-  max-width: 420px;
+  max-width: 400px;
+  margin: 0 auto clamp(2rem, 5vw, 3rem);
   opacity: 0;
-  animation: up 0.8s ease forwards 0.7s;
+  animation: rise 0.8s ease forwards 0.65s;
 }
 
-/* CTA */
-.cta-block {
-  margin-top: 2.75rem;
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
+/* ── cta ── */
+.cta-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  width: 100%; max-width: 360px;
   opacity: 0;
-  animation: up 0.8s ease forwards 0.85s;
+  animation: rise 0.8s ease forwards 0.8s;
 }
 
 .cta-eyebrow {
-  font-size: 11px; font-weight: 400;
-  letter-spacing: 0.1em;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--dimmer);
+  color: rgba(255,255,255,0.45);
 }
 
-.cta-btn {
-  display: inline-flex; align-items: center; gap: 10px;
+.cta-card {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%;
   background: var(--surface);
-  border: 1px solid var(--border-hover);
-  border-radius: 10px;
-  padding: 14px 24px;
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+  padding: 14px 18px;
   text-decoration: none;
-  color: var(--white);
-  font-family: 'Onest', sans-serif;
-  font-size: 14px; font-weight: 400;
-  letter-spacing: 0.01em;
+  color: var(--text);
   transition: border-color 0.2s, background 0.2s, transform 0.15s;
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
 }
-.cta-btn::before {
+.cta-card::after {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(110,92,255,0.15), rgba(167,139,250,0.08));
+  background: linear-gradient(135deg, var(--blue-glow), transparent 60%);
   opacity: 0;
   transition: opacity 0.25s;
 }
-.cta-btn:hover { border-color: rgba(110,92,255,0.45); transform: translateY(-1px); }
-.cta-btn:hover::before { opacity: 1; }
-.cta-btn:active { transform: scale(0.98) translateY(0); }
+.cta-card:hover { border-color: rgba(59,130,246,0.35); transform: translateY(-1px); }
+.cta-card:hover::after { opacity: 1; }
+.cta-card:active { transform: scale(0.99); }
 
-.cta-btn .icon {
-  width: 32px; height: 32px;
-  background: rgba(110,92,255,0.15);
-  border-radius: 8px;
+.cta-icon {
+  width: 38px; height: 38px; flex-shrink: 0;
+  background: var(--blue-dim);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
 }
-.cta-btn .icon svg { width: 14px; height: 14px; }
-.cta-btn .text-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; }
-.cta-btn .label { font-size: 13px; font-weight: 500; color: var(--white); }
-.cta-btn .sublabel { font-size: 11px; font-weight: 300; color: var(--dim); }
+.cta-icon svg { width: 16px; height: 16px; color: var(--blue); }
 
-/* ps line */
-.ps-line {
-  margin-top: 3rem;
-  font-size: 12px; font-weight: 300;
-  color: rgba(255,255,255,0.18);
-  letter-spacing: 0.03em;
-  max-width: 400px; line-height: 1.8;
+.cta-text { flex: 1; text-align: left; }
+.cta-label { font-size: 14px; font-weight: 500; color: var(--text); display: block; }
+.cta-sub   { font-size: 12px; font-weight: 300; color: var(--muted); display: block; margin-top: 2px; }
+
+.cta-arrow { color: var(--muted); font-size: 18px; font-weight: 300; flex-shrink: 0; }
+
+/* ── ps ── */
+.ps {
+  font-size: clamp(0.75rem, 1.8vw, 0.82rem);
+  font-weight: 400;
+  color: rgba(255,255,255,0.42);
+  line-height: 1.8;
+  max-width: 380px;
+  margin-top: clamp(2rem, 5vw, 3rem);
   opacity: 0;
-  animation: up 0.8s ease forwards 1.05s;
+  animation: rise 0.8s ease forwards 1s;
 }
-.ps-line span { color: rgba(255,255,255,0.3); }
+.ps em { color: rgba(255,255,255,0.58); font-style: normal; }
 
-/* footer */
+/* ── footer ── */
 footer {
   position: relative; z-index: 10;
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1.25rem 2.5rem;
+  padding: 1.1rem clamp(1.25rem, 5vw, 2.5rem);
   border-top: 1px solid var(--border);
   opacity: 0;
-  animation: up 0.6s ease forwards 1.2s;
+  animation: rise 0.6s ease forwards 1.15s;
 }
-.footer-left {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700; font-size: 14px;
-  letter-spacing: -0.01em;
+.f-name {
+  font-size: 13px; font-weight: 400;
   color: rgba(255,255,255,0.5);
+  letter-spacing: 0.02em;
 }
-.footer-right { font-size: 11px; font-weight: 300; color: rgba(255,255,255,0.2); letter-spacing: 0.05em; }
+.f-name .ai { color: var(--blue); font-weight: 500; }
+.f-copy { font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.35); }
 
-@keyframes up {
-  from { opacity:0; transform:translateY(18px); }
+/* ── animation ── */
+@keyframes rise {
+  from { opacity:0; transform:translateY(16px); }
   to   { opacity:1; transform:translateY(0); }
 }
 
-@media (max-width: 500px) {
-  footer { flex-direction: column; gap: 6px; text-align: center; }
-  .cta-btn { width: 100%; max-width: 320px; }
+/* ── mobile ── */
+@media (max-width: 420px) {
+  .cta-card { border-radius: 12px; }
+  footer { gap: 6px; }
 }
+
 </style>
 </head>
 <body>
 
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<canvas id="nerve-canvas"></canvas>
+<div class="glow glow-top"></div>
+<div class="glow glow-bot"></div>
+<canvas id="cv"></canvas>
 
-<main>
+<main class="page">
 
   <div class="badge">
-    <div class="badge-dot"></div>
+    <div class="dot"></div>
     Quietly building
   </div>
 
-  <h1 class="wordmark">nervebase</h1>
+  <h1 class="logo">nervebase<span class="ai">.ai</span></h1>
 
   <p class="headline">
-    We're <b>too deep in the build</b> to have worked on our own website.<br />
+    We're <strong>too deep in the build</strong> to have worked<br class="br" />
+    on our own website.<br />
     We think that's a pretty good sign.
   </p>
 
-  <div class="sep">
-    <div class="sep-line"></div>
-    <span class="sep-icon">— but hey —</span>
-    <div class="sep-line"></div>
-  </div>
+  <div class="rule"></div>
 
-  <p class="para">
-    Something meaningful is taking shape here. The kind of thing that deserves your full attention — which is exactly what we're giving it. We'll surface when it's ready.
+  <p class="body">
+    Something meaningful is taking shape here — the kind of thing that demands full attention. Which is exactly what we're giving it. We'll surface when it's ready.
   </p>
 
-  <div class="cta-block">
+  <div class="cta-wrap">
     <span class="cta-eyebrow">Think you can keep up? Come build with us.</span>
-    <a class="cta-btn" href="mailto:careers@nervebase.ai">
-      <div class="icon">
-        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="#a78bfa" stroke-width="1.3"/>
-          <path d="M2 4L8 9.5L14 4" stroke="#a78bfa" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <a class="cta-card" href="mailto:careers@nervebase.ai">
+      <div class="cta-icon">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/>
+          <path d="M2 4.5L8 9.5L14 4.5"/>
         </svg>
       </div>
-      <div class="text-wrap">
-        <span class="label">careers@nervebase.ai</span>
-        <span class="sublabel">Drop us a line — we read everything</span>
+      <div class="cta-text">
+        <span class="cta-label">careers@nervebase.ai</span>
+        <span class="cta-sub">We read every single email</span>
       </div>
+      <span class="cta-arrow">→</span>
     </a>
   </div>
 
-  <p class="ps-line">
-    p.s. — <span>if curiosity is already getting to you, that's the point.</span><br />good things are worth the wait.
+  <p class="ps">
+    p.s. — <em>if the mystery is already getting to you, that's the point.</em><br />
+    good things are worth the wait.
   </p>
 
 </main>
 
 <footer>
-  <span class="footer-left">nervebase</span>
-  <span class="footer-right">nervebase.ai</span>
+  <span class="f-name">nervebase<span class="ai">.ai</span></span>
+  <span class="f-copy">© 2025 Nervebase</span>
 </footer>
 
 <script>
-const canvas = document.getElementById('nerve-canvas');
-const ctx = canvas.getContext('2d');
-let W, H, nodes, pulses;
+const cv = document.getElementById('cv');
+const cx = cv.getContext('2d');
+let W, H, nodes, pulses, lastP = 0;
 
 function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-  init();
-}
-
-function init() {
+  W = cv.width  = window.innerWidth;
+  H = cv.height = window.innerHeight;
   nodes = [];
-  const count = Math.floor((W * H) / 24000);
-  for (let i = 0; i < count; i++) {
-    nodes.push({ x: Math.random()*W, y: Math.random()*H, vx:(Math.random()-.5)*.12, vy:(Math.random()-.5)*.12 });
-  }
   pulses = [];
+  const n = Math.floor((W * H) / 28000);
+  for (let i = 0; i < n; i++) {
+    nodes.push({ x: Math.random()*W, y: Math.random()*H, vx:(Math.random()-.5)*.1, vy:(Math.random()-.5)*.1 });
+  }
 }
 
-let lastPulse = 0;
-
-function draw(ts) {
-  requestAnimationFrame(draw);
-  ctx.clearRect(0,0,W,H);
-  const maxD = 155;
+function frame(ts) {
+  requestAnimationFrame(frame);
+  cx.clearRect(0,0,W,H);
+  const D = 145;
 
   for (const n of nodes) {
     n.x += n.vx; n.y += n.vy;
-    if (n.x<0||n.x>W) n.vx*=-1;
-    if (n.y<0||n.y>H) n.vy*=-1;
+    if (n.x < 0 || n.x > W) n.vx *= -1;
+    if (n.y < 0 || n.y > H) n.vy *= -1;
   }
 
-  if (ts - lastPulse > 650) {
-    if (nodes.length) pulses.push({ idx: Math.floor(Math.random()*nodes.length), t:0, speed:0.007+Math.random()*.007 });
-    lastPulse = ts;
+  if (ts - lastP > 700 && nodes.length) {
+    pulses.push({ i: Math.floor(Math.random()*nodes.length), t:0, s:0.007+Math.random()*.006 });
+    lastP = ts;
   }
 
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i+1; j < nodes.length; j++) {
       const dx = nodes[j].x-nodes[i].x, dy = nodes[j].y-nodes[i].y;
       const d = Math.sqrt(dx*dx+dy*dy);
-      if (d < maxD) {
-        ctx.beginPath();
-        ctx.moveTo(nodes[i].x, nodes[i].y);
-        ctx.lineTo(nodes[j].x, nodes[j].y);
-        ctx.strokeStyle = `rgba(110,92,255,${(1-d/maxD)*0.2})`;
-        ctx.lineWidth = 0.6;
-        ctx.stroke();
+      if (d < D) {
+        cx.beginPath();
+        cx.moveTo(nodes[i].x, nodes[i].y);
+        cx.lineTo(nodes[j].x, nodes[j].y);
+        cx.strokeStyle = `rgba(59,130,246,${(1-d/D)*0.18})`;
+        cx.lineWidth = 0.5;
+        cx.stroke();
       }
     }
   }
 
   for (let p = pulses.length-1; p >= 0; p--) {
     const pulse = pulses[p];
-    pulse.t += pulse.speed;
+    pulse.t += pulse.s;
     if (pulse.t > 1) { pulses.splice(p,1); continue; }
-    const src = nodes[pulse.idx];
+    const src = nodes[pulse.i];
     let cd = Infinity, cn = null;
     for (let i = 0; i < nodes.length; i++) {
-      if (i === pulse.idx) continue;
+      if (i === pulse.i) continue;
       const dx = nodes[i].x-src.x, dy = nodes[i].y-src.y;
       const d = Math.sqrt(dx*dx+dy*dy);
-      if (d < maxD && d < cd) { cd=d; cn=nodes[i]; }
+      if (d < D && d < cd) { cd=d; cn=nodes[i]; }
     }
     if (!cn) continue;
     const px = src.x+(cn.x-src.x)*pulse.t;
     const py = src.y+(cn.y-src.y)*pulse.t;
-    const g = ctx.createRadialGradient(px,py,0,px,py,6);
-    g.addColorStop(0,'rgba(167,139,250,0.9)');
-    g.addColorStop(1,'rgba(110,92,255,0)');
-    ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2);
-    ctx.fillStyle = g; ctx.fill();
+    const g = cx.createRadialGradient(px,py,0,px,py,6);
+    g.addColorStop(0,'rgba(147,197,253,0.9)');
+    g.addColorStop(1,'rgba(59,130,246,0)');
+    cx.beginPath(); cx.arc(px,py,6,0,Math.PI*2);
+    cx.fillStyle = g; cx.fill();
   }
 
   for (const n of nodes) {
-    ctx.beginPath(); ctx.arc(n.x,n.y,1.5,0,Math.PI*2);
-    ctx.fillStyle = 'rgba(110,92,255,0.28)'; ctx.fill();
+    cx.beginPath(); cx.arc(n.x,n.y,1.4,0,Math.PI*2);
+    cx.fillStyle = 'rgba(59,130,246,0.25)'; cx.fill();
   }
 }
 
 window.addEventListener('resize', resize);
 resize();
-requestAnimationFrame(draw);
+requestAnimationFrame(frame);
 </script>
 </body>
 </html>
